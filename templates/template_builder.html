@@ -1,0 +1,325 @@
+{% extends "base.html" %}
+
+{% block title %}Construtor de Templates - Sistema de Correção{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-primary mb-2">
+                    <i class="fas fa-tools" aria-hidden="true"></i>
+                    Construtor de Templates
+                </h1>
+                <p class="text-secondary">
+                    Crie e personalize templates para correção automática de provas
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-secondary" onclick="loadTemplate()">
+                    <i class="fas fa-folder-open" aria-hidden="true"></i>
+                    Carregar Template
+                </button>
+                <button class="btn btn-success" onclick="saveTemplate()">
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    Salvar Template
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Configuration -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <!-- Left Panel - Template Settings -->
+        <div class="lg:col-span-1">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-cog" aria-hidden="true"></i>
+                        Configurações Gerais
+                    </h2>
+                </div>
+                <div class="card-body space-y-4">
+                    <div class="form-group">
+                        <label for="template-name" class="form-label">Nome do Template</label>
+                        <input type="text" id="template-name" class="form-input" 
+                               placeholder="Ex: Prova de Matemática - 1º Bimestre"
+                               aria-describedby="template-name-help">
+                        <div id="template-name-help" class="form-help">
+                            Nome descritivo para identificar o template
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="template-version" class="form-label">Versão</label>
+                        <input type="text" id="template-version" class="form-input" 
+                               value="1.0" placeholder="1.0">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="template-author" class="form-label">Criado por</label>
+                        <input type="text" id="template-author" class="form-input" 
+                               placeholder="Seu nome">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="template-instructions" class="form-label">Instruções</label>
+                        <textarea id="template-instructions" class="form-input" rows="3"
+                                  placeholder="Instruções para os alunos..."></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="grading-scale" class="form-label">Escala de Notas</label>
+                        <select id="grading-scale" class="form-input">
+                            <option value="0-10">0 a 10</option>
+                            <option value="0-100">0 a 100</option>
+                            <option value="letter">A, B, C, D, F</option>
+                            <option value="custom">Personalizada</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="passing-grade" class="form-label">Nota Mínima (%)</label>
+                        <input type="number" id="passing-grade" class="form-input" 
+                               min="0" max="100" value="60">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="multiple-versions" class="form-checkbox">
+                            <span class="form-label mb-0">Criar Múltiplas Versões</span>
+                        </label>
+                        <div id="version-settings" class="mt-2" style="display: none;">
+                            <label for="version-count" class="form-label text-sm">Número de Versões</label>
+                            <select id="version-count" class="form-input">
+                                <option value="2">2 versões (A, B)</option>
+                                <option value="3">3 versões (A, B, C)</option>
+                                <option value="4">4 versões (A, B, C, D)</option>
+                            </select>
+                            <div class="form-help text-xs mt-1">
+                                As questões serão embaralhadas entre as versões
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Question Types Panel -->
+            <div class="card mt-6">
+                <div class="card-header">
+                    <h2 class="card-title">
+                        <i class="fas fa-list" aria-hidden="true"></i>
+                        Tipos de Questão
+                    </h2>
+                </div>
+                <div class="card-body">
+                    <div class="space-y-2" id="question-types-list">
+                        <div class="question-type-item" data-type="multiple_choice">
+                            <button class="btn btn-secondary btn-sm w-full text-left" 
+                                    onclick="addQuestion('multiple_choice')">
+                                <i class="fas fa-list-ul" aria-hidden="true"></i>
+                                Múltipla Escolha
+                            </button>
+                        </div>
+                        <div class="question-type-item" data-type="true_false">
+                            <button class="btn btn-secondary btn-sm w-full text-left" 
+                                    onclick="addQuestion('true_false')">
+                                <i class="fas fa-check-circle" aria-hidden="true"></i>
+                                Verdadeiro/Falso
+                            </button>
+                        </div>
+                        <div class="question-type-item" data-type="numeric">
+                            <button class="btn btn-secondary btn-sm w-full text-left" 
+                                    onclick="addQuestion('numeric')">
+                                <i class="fas fa-calculator" aria-hidden="true"></i>
+                                Numérica
+                            </button>
+                        </div>
+                        <div class="question-type-item" data-type="short_text">
+                            <button class="btn btn-secondary btn-sm w-full text-left" 
+                                    onclick="addQuestion('short_text')">
+                                <i class="fas fa-font" aria-hidden="true"></i>
+                                Texto Curto
+                            </button>
+                        </div>
+                        <div class="question-type-item" data-type="custom_symbols">
+                            <button class="btn btn-secondary btn-sm w-full text-left" 
+                                    onclick="addQuestion('custom_symbols')">
+                                <i class="fas fa-shapes" aria-hidden="true"></i>
+                                Símbolos Customizados
+                            </button>
+                        </div>
+                        <div class="question-type-item" data-type="greek_alphabet">
+                            <button class="btn btn-secondary btn-sm w-full text-left" 
+                                    onclick="addQuestion('greek_alphabet')">
+                                <i class="fas fa-language" aria-hidden="true"></i>
+                                Alfabeto Grego
+                            </button>
+                        </div>
+                        <div class="question-type-item" data-type="combinations">
+                            <button class="btn btn-secondary btn-sm w-full text-left" 
+                                    onclick="addQuestion('combinations')">
+                                <i class="fas fa-th" aria-hidden="true"></i>
+                                Combinações (A1, B2)
+                            </button>
+                        </div>
+                        <div class="question-type-item" data-type="associative">
+                            <button class="btn btn-secondary btn-sm w-full text-left" 
+                                    onclick="addQuestion('associative')">
+                                <i class="fas fa-link" aria-hidden="true"></i>
+                                Questões Associativas
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Panel - Questions Editor -->
+        <div class="lg:col-span-2">
+            <div class="card">
+                <div class="card-header">
+                    <div class="flex items-center justify-between">
+                        <h2 class="card-title">
+                            <i class="fas fa-edit" aria-hidden="true"></i>
+                            Editor de Questões
+                        </h2>
+                        <div class="flex items-center gap-2">
+                            <span class="text-sm text-secondary">
+                                Total: <span id="question-count">0</span> questões
+                            </span>
+                            <button class="btn btn-primary btn-sm" onclick="addQuestion('multiple_choice')">
+                                <i class="fas fa-plus" aria-hidden="true"></i>
+                                Adicionar Questão
+                            </button>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="questions-container" class="space-y-4">
+                        <!-- Questions will be added here dynamically -->
+                        <div class="text-center py-8 text-secondary" id="empty-state">
+                            <i class="fas fa-question-circle fa-3x mb-4" aria-hidden="true"></i>
+                            <h3 class="text-lg font-semibold mb-2">Nenhuma questão adicionada</h3>
+                            <p class="mb-4">Clique em um tipo de questão à esquerda para começar</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Preview Section -->
+    <div class="mt-8">
+        <div class="card">
+            <div class="card-header">
+                <div class="flex items-center justify-between">
+                    <h2 class="card-title">
+                        <i class="fas fa-eye" aria-hidden="true"></i>
+                        Visualização do Template
+                    </h2>
+                    <div class="flex gap-2">
+                        <button class="btn btn-secondary btn-sm" onclick="togglePreview()">
+                            <i class="fas fa-expand" aria-hidden="true"></i>
+                            Expandir
+                        </button>
+                        <button class="btn btn-info btn-sm" onclick="testTemplate()">
+                            <i class="fas fa-play" aria-hidden="true"></i>
+                            Testar Template
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="card-body">
+                <div id="template-preview" class="border rounded p-4 bg-gray-50 min-h-48">
+                    <div class="text-center text-secondary py-8">
+                        <i class="fas fa-file-alt fa-2x mb-2" aria-hidden="true"></i>
+                        <p>A visualização aparecerá aqui conforme você adiciona questões</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Question Editor Modal -->
+<div id="question-modal" class="modal-overlay" style="display: none;" 
+     role="dialog" aria-labelledby="question-modal-title" aria-hidden="true">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="question-modal-title" class="modal-title">Editar Questão</h3>
+            <button class="modal-close" onclick="closeQuestionModal()" 
+                    aria-label="Fechar editor de questão">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="modal-body" id="question-modal-content">
+            <!-- Question Settings -->
+            <div class="form-group mb-4">
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label for="question-weight" class="form-label">Peso da Questão</label>
+                        <input type="number" id="question-weight" class="form-input" 
+                               min="0.1" max="10" step="0.1" value="1.0">
+                    </div>
+                    <div class="flex items-center">
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" id="partial-credit" class="form-checkbox">
+                            <span class="form-label mb-0">Permitir Crédito Parcial</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="question-editor-content">
+                <!-- Dynamic content will be inserted here -->
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeQuestionModal()">
+                Cancelar
+            </button>
+            <button class="btn btn-primary" onclick="saveQuestion()">
+                <i class="fas fa-save" aria-hidden="true"></i>
+                Salvar Questão
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Load Template Modal -->
+<div id="load-template-modal" class="modal-overlay" style="display: none;" 
+     role="dialog" aria-labelledby="load-modal-title" aria-hidden="true">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="load-modal-title" class="modal-title">Carregar Template</h3>
+            <button class="modal-close" onclick="closeLoadModal()" 
+                    aria-label="Fechar carregar template">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="space-y-4">
+                <div class="form-group">
+                    <label for="template-search" class="form-label">Buscar Templates</label>
+                    <input type="text" id="template-search" class="form-input" 
+                           placeholder="Digite o nome do template...">
+                </div>
+                <div id="available-templates" class="space-y-2 max-h-64 overflow-y-auto">
+                    <!-- Available templates will be loaded here -->
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeLoadModal()">
+                Cancelar
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/template_builder.js') }}"></script>
+{% endblock %}

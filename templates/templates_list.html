@@ -1,0 +1,196 @@
+{% extends "base.html" %}
+
+{% block title %}Gerenciar Templates - Sistema de Correção{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Gerenciar Templates</h1>
+            <p class="text-gray-600 mt-1">Visualize, edite e organize seus templates de correção</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="showImportModal()" class="btn btn-secondary">
+                <i class="fas fa-upload mr-2"></i>
+                Importar Template
+            </button>
+            <a href="/templates/builder" class="btn btn-primary">
+                <i class="fas fa-plus mr-2"></i>
+                Novo Template
+            </a>
+        </div>
+    </div>
+
+    <!-- Filters and Search -->
+    <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
+        <div class="flex flex-wrap items-center gap-4">
+            <div class="flex-1 min-w-64">
+                <div class="relative">
+                    <i class="fas fa-search absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400"></i>
+                    <input type="text" id="search-templates" class="form-input pl-10" 
+                           placeholder="Buscar templates por nome, autor ou matéria...">
+                </div>
+            </div>
+            <div class="flex gap-2">
+                <select id="filter-author" class="form-select">
+                    <option value="">Todos os autores</option>
+                </select>
+                <select id="filter-subject" class="form-select">
+                    <option value="">Todas as matérias</option>
+                    <option value="matematica">Matemática</option>
+                    <option value="historia">História</option>
+                    <option value="ciencias">Ciências</option>
+                    <option value="portugues">Português</option>
+                </select>
+                <select id="sort-by" class="form-select">
+                    <option value="name">Nome</option>
+                    <option value="created_at">Data de criação</option>
+                    <option value="last_used">Último uso</option>
+                    <option value="questions">Nº de questões</option>
+                </select>
+            </div>
+        </div>
+    </div>
+
+    <!-- Templates Grid -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6" id="templates-grid">
+        <!-- Templates will be loaded here -->
+        <div class="col-span-full text-center py-12">
+            <i class="fas fa-spinner fa-spin fa-2x text-gray-400 mb-4"></i>
+            <p class="text-gray-500">Carregando templates...</p>
+        </div>
+    </div>
+
+    <!-- Empty State -->
+    <div id="empty-state" class="text-center py-12" style="display: none;">
+        <i class="fas fa-file-alt fa-4x text-gray-300 mb-4"></i>
+        <h3 class="text-xl font-semibold text-gray-600 mb-2">Nenhum template encontrado</h3>
+        <p class="text-gray-500 mb-6">Crie seu primeiro template para começar a usar o sistema de correção</p>
+        <a href="/templates/builder" class="btn btn-primary">
+            <i class="fas fa-plus mr-2"></i>
+            Criar Primeiro Template
+        </a>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Template Actions Modal -->
+<div id="template-actions-modal" class="modal" style="display: none;">
+    <div class="modal-content max-w-md">
+        <div class="modal-header">
+            <h3 id="template-actions-title">Ações do Template</h3>
+            <button class="modal-close" onclick="closeTemplateActions()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="space-y-3">
+                <button class="btn btn-outline w-full justify-start" onclick="editTemplate()">
+                    <i class="fas fa-edit mr-3"></i>
+                    Editar Template
+                </button>
+                <button class="btn btn-outline w-full justify-start" onclick="duplicateTemplate()">
+                    <i class="fas fa-copy mr-3"></i>
+                    Duplicar Template
+                </button>
+                <button class="btn btn-outline w-full justify-start" onclick="exportTemplate()">
+                    <i class="fas fa-download mr-3"></i>
+                    Exportar Template
+                </button>
+                <button class="btn btn-outline w-full justify-start" onclick="viewTemplateHistory()">
+                    <i class="fas fa-history mr-3"></i>
+                    Ver Histórico
+                </button>
+                <button class="btn btn-outline w-full justify-start" onclick="useTemplateForCorrection()">
+                    <i class="fas fa-play mr-3"></i>
+                    Usar para Correção
+                </button>
+                <hr class="my-3">
+                <button class="btn btn-error w-full justify-start" onclick="deleteTemplate()">
+                    <i class="fas fa-trash mr-3"></i>
+                    Excluir Template
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Template Preview Modal -->
+<div id="template-preview-modal" class="modal" style="display: none;">
+    <div class="modal-content max-w-4xl">
+        <div class="modal-header">
+            <h3 id="template-preview-title">Visualizar Template</h3>
+            <button class="modal-close" onclick="closeTemplatePreview()">&times;</button>
+        </div>
+        <div class="modal-body" id="template-preview-content">
+            <!-- Template preview will be shown here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeTemplatePreview()">Fechar</button>
+            <button class="btn btn-primary" onclick="editTemplateFromPreview()">Editar Template</button>
+        </div>
+    </div>
+</div>
+
+<!-- Import Template Modal -->
+<div id="import-modal" class="modal" style="display: none;">
+    <div class="modal-content max-w-md">
+        <div class="modal-header">
+            <h3>Importar Template</h3>
+            <button class="modal-close" onclick="closeImportModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="space-y-4">
+                <div class="upload-area border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-colors cursor-pointer"
+                     onclick="document.getElementById('import-file-input').click()">
+                    <i class="fas fa-cloud-upload-alt fa-2x text-gray-400 mb-2"></i>
+                    <p class="text-gray-600 mb-2">Arraste um arquivo aqui ou clique para selecionar</p>
+                    <p class="text-sm text-gray-400">Formatos aceitos: JSON, XML (máx. 5MB)</p>
+                    <input type="file" id="import-file-input" class="hidden" accept=".json,.xml" onchange="handleImportFile(this)">
+                </div>
+                
+                <div id="import-preview" class="bg-gray-50 p-4 rounded" style="display: none;">
+                    <h4 class="font-semibold mb-2">Template a ser importado:</h4>
+                    <div id="import-details">
+                        <!-- Import details will be shown here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeImportModal()">Cancelar</button>
+            <button id="confirm-import-btn" class="btn btn-primary" onclick="confirmImport()" disabled>
+                Importar Template
+            </button>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="delete-modal" class="modal" style="display: none;">
+    <div class="modal-content max-w-md">
+        <div class="modal-header">
+            <h3>Confirmar Exclusão</h3>
+            <button class="modal-close" onclick="closeDeleteModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="text-center">
+                <i class="fas fa-exclamation-triangle fa-3x text-red-500 mb-4"></i>
+                <h4 class="text-lg font-semibold mb-2">Tem certeza que deseja excluir este template?</h4>
+                <p class="text-gray-600 mb-4" id="delete-template-name">Esta ação não pode ser desfeita.</p>
+                <div class="bg-red-50 border border-red-200 rounded p-3 text-sm text-red-700">
+                    <strong>Atenção:</strong> Todos os dados relacionados a este template serão perdidos permanentemente.
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeDeleteModal()">Cancelar</button>
+            <button class="btn btn-error" onclick="confirmDelete()">
+                <i class="fas fa-trash mr-2"></i>
+                Excluir Definitivamente
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="/static/js/templates_management.js"></script>
+{% endblock %}

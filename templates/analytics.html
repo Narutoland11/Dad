@@ -1,0 +1,434 @@
+{% extends "base.html" %}
+
+{% block title %}Analytics e Relatórios - Sistema de Correção{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-primary mb-2">
+                    <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                    Analytics e Relatórios
+                </h1>
+                <p class="text-secondary">
+                    Análise detalhada do desempenho das correções e estatísticas do sistema
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-secondary" onclick="refreshData()">
+                    <i class="fas fa-sync-alt" aria-hidden="true"></i>
+                    Atualizar Dados
+                </button>
+                <button class="btn btn-primary" onclick="exportReport()">
+                    <i class="fas fa-download" aria-hidden="true"></i>
+                    Exportar Relatório
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Time Period Filter -->
+    <div class="card mb-6">
+        <div class="card-body">
+            <div class="flex items-center gap-4">
+                <label for="period-select" class="form-label mb-0">Período:</label>
+                <select id="period-select" class="form-input w-auto" onchange="updatePeriod()">
+                    <option value="7">Últimos 7 dias</option>
+                    <option value="30" selected>Últimos 30 dias</option>
+                    <option value="90">Últimos 3 meses</option>
+                    <option value="365">Último ano</option>
+                    <option value="custom">Período personalizado</option>
+                </select>
+                
+                <div id="custom-period" class="flex items-center gap-2" style="display: none;">
+                    <input type="date" id="start-date" class="form-input w-auto">
+                    <span>até</span>
+                    <input type="date" id="end-date" class="form-input w-auto">
+                    <button class="btn btn-sm btn-primary" onclick="applyCustomPeriod()">
+                        Aplicar
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Key Metrics -->
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="text-3xl font-bold text-primary mb-2" id="total-corrections">0</div>
+                <div class="text-sm text-secondary">Total de Correções</div>
+                <div class="text-xs text-success mt-1" id="corrections-change">+0% vs período anterior</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="text-3xl font-bold text-info mb-2" id="average-score">0.0</div>
+                <div class="text-sm text-secondary">Nota Média</div>
+                <div class="text-xs text-success mt-1" id="score-change">+0% vs período anterior</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="text-3xl font-bold text-success mb-2" id="success-rate">0%</div>
+                <div class="text-sm text-secondary">Taxa de Aprovação</div>
+                <div class="text-xs text-success mt-1" id="success-change">+0% vs período anterior</div>
+            </div>
+        </div>
+        
+        <div class="card">
+            <div class="card-body text-center">
+                <div class="text-3xl font-bold text-warning mb-2" id="processing-time">0.0s</div>
+                <div class="text-sm text-secondary">Tempo Médio</div>
+                <div class="text-xs text-success mt-1" id="time-change">-0% vs período anterior</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Corrections Over Time -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-line-chart" aria-hidden="true"></i>
+                    Correções ao Longo do Tempo
+                </h2>
+            </div>
+            <div class="card-body">
+                <div id="corrections-chart" class="chart-container">
+                    <canvas id="corrections-canvas" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+
+        <!-- Score Distribution -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-chart-pie" aria-hidden="true"></i>
+                    Distribuição de Notas
+                </h2>
+            </div>
+            <div class="card-body">
+                <div id="score-distribution-chart" class="chart-container">
+                    <canvas id="score-canvas" width="400" height="200"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Template Performance -->
+    <div class="card mb-8">
+        <div class="card-header">
+            <h2 class="card-title">
+                <i class="fas fa-trophy" aria-hidden="true"></i>
+                Performance por Template
+            </h2>
+        </div>
+        <div class="card-body">
+            <div class="overflow-x-auto">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Template</th>
+                            <th>Correções</th>
+                            <th>Nota Média</th>
+                            <th>Taxa de Aprovação</th>
+                            <th>Tempo Médio</th>
+                            <th>Última Utilização</th>
+                        </tr>
+                    </thead>
+                    <tbody id="template-performance-table">
+                        <!-- Data will be loaded here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Question Analysis -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
+        <!-- Most Difficult Questions -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                    Questões Mais Difíceis
+                </h2>
+            </div>
+            <div class="card-body">
+                <div id="difficult-questions" class="space-y-3">
+                    <!-- Data will be loaded here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Error Patterns -->
+        <div class="card">
+            <div class="card-header">
+                <h2 class="card-title">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    Padrões de Erro
+                </h2>
+            </div>
+            <div class="card-body">
+                <div id="error-patterns" class="space-y-3">
+                    <!-- Data will be loaded here -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Activity -->
+    <div class="card mb-8">
+        <div class="card-header">
+            <div class="flex items-center justify-between">
+                <h2 class="card-title">
+                    <i class="fas fa-clock" aria-hidden="true"></i>
+                    Atividade Recente
+                </h2>
+                <button class="btn btn-sm btn-secondary" onclick="loadMoreActivity()">
+                    <i class="fas fa-plus" aria-hidden="true"></i>
+                    Carregar Mais
+                </button>
+            </div>
+        </div>
+        <div class="card-body">
+            <div id="recent-activity" class="space-y-3">
+                <!-- Activity items will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <!-- System Health -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-server" aria-hidden="true"></i>
+                    Status do Sistema
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-2">
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">API</span>
+                        <span class="status-indicator status-online" id="api-status">Online</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">OCR Engine</span>
+                        <span class="status-indicator status-online" id="ocr-status">Online</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span class="text-sm">Database</span>
+                        <span class="status-indicator status-online" id="db-status">Online</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-tachometer-alt" aria-hidden="true"></i>
+                    Performance
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-3">
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm">CPU</span>
+                            <span class="text-sm" id="cpu-usage">45%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 45%" id="cpu-bar"></div>
+                        </div>
+                    </div>
+                    <div>
+                        <div class="flex items-center justify-between mb-1">
+                            <span class="text-sm">Memória</span>
+                            <span class="text-sm" id="memory-usage">62%</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" style="width: 62%" id="memory-bar"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <h3 class="card-title">
+                    <i class="fas fa-chart-line" aria-hidden="true"></i>
+                    Estatísticas Rápidas
+                </h3>
+            </div>
+            <div class="card-body">
+                <div class="space-y-2 text-sm">
+                    <div class="flex items-center justify-between">
+                        <span>Templates Ativos</span>
+                        <span class="font-semibold" id="active-templates">0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Usuários Ativos</span>
+                        <span class="font-semibold" id="active-users">0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Correções Hoje</span>
+                        <span class="font-semibold" id="today-corrections">0</span>
+                    </div>
+                    <div class="flex items-center justify-between">
+                        <span>Uptime</span>
+                        <span class="font-semibold" id="system-uptime">99.9%</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div id="export-modal" class="modal-overlay" style="display: none;" 
+     role="dialog" aria-labelledby="export-modal-title" aria-hidden="true">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="export-modal-title" class="modal-title">Exportar Relatório</h3>
+            <button class="modal-close" onclick="closeExportModal()" 
+                    aria-label="Fechar exportação">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <div class="space-y-4">
+                <div class="form-group">
+                    <label class="form-label">Formato de Exportação</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="export-format" value="pdf" checked>
+                            <span>PDF - Relatório completo</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="export-format" value="excel">
+                            <span>Excel - Dados para análise</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="radio" name="export-format" value="csv">
+                            <span>CSV - Dados brutos</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div class="form-group">
+                    <label class="form-label">Incluir Seções</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" checked>
+                            <span>Métricas principais</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" checked>
+                            <span>Gráficos e visualizações</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox" checked>
+                            <span>Performance por template</span>
+                        </label>
+                        <label class="flex items-center gap-2">
+                            <input type="checkbox">
+                            <span>Dados detalhados por aluno</span>
+                        </label>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeExportModal()">
+                Cancelar
+            </button>
+            <button class="btn btn-primary" onclick="generateExport()">
+                <i class="fas fa-download" aria-hidden="true"></i>
+                Gerar Relatório
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.chart-container {
+    position: relative;
+    height: 200px;
+    width: 100%;
+}
+
+.status-indicator {
+    padding: 2px 8px;
+    border-radius: 12px;
+    font-size: 0.75rem;
+    font-weight: 500;
+}
+
+.status-online {
+    background-color: var(--success-light);
+    color: var(--success);
+}
+
+.status-offline {
+    background-color: var(--error-light);
+    color: var(--error);
+}
+
+.status-warning {
+    background-color: var(--warning-light);
+    color: var(--warning);
+}
+
+.progress-bar {
+    width: 100%;
+    height: 8px;
+    background-color: var(--bg-secondary);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-fill {
+    height: 100%;
+    background-color: var(--primary);
+    transition: width 0.3s ease;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th,
+.table td {
+    padding: 12px;
+    text-align: left;
+    border-bottom: 1px solid var(--border);
+}
+
+.table th {
+    background-color: var(--bg-secondary);
+    font-weight: 600;
+    color: var(--text-primary);
+}
+
+.table tr:hover {
+    background-color: var(--bg-secondary);
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/analytics.js') }}"></script>
+{% endblock %}

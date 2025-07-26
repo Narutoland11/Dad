@@ -1,0 +1,329 @@
+{% extends "base.html" %}
+
+{% block title %}Relatórios Detalhados - Sistema de Correção{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="flex items-center justify-between mb-6">
+        <div>
+            <h1 class="text-3xl font-bold text-gray-900">Relatórios Detalhados</h1>
+            <p class="text-gray-600 mt-1">Análise completa dos resultados de correção</p>
+        </div>
+        <div class="flex gap-3">
+            <button onclick="generateReport()" class="btn btn-secondary">
+                <i class="fas fa-chart-line mr-2"></i>
+                Gerar Relatório
+            </button>
+            <button onclick="exportAllReports()" class="btn btn-primary">
+                <i class="fas fa-download mr-2"></i>
+                Exportar Tudo
+            </button>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="bg-white rounded-lg shadow-sm border p-4 mb-6">
+        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div>
+                <label class="form-label">Período</label>
+                <select id="period-filter" class="form-select">
+                    <option value="7">Últimos 7 dias</option>
+                    <option value="30">Últimos 30 dias</option>
+                    <option value="90">Últimos 3 meses</option>
+                    <option value="365">Último ano</option>
+                    <option value="all">Todos os períodos</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Template</label>
+                <select id="template-filter" class="form-select">
+                    <option value="">Todos os templates</option>
+                </select>
+            </div>
+            <div>
+                <label class="form-label">Turma/Grupo</label>
+                <select id="group-filter" class="form-select">
+                    <option value="">Todas as turmas</option>
+                    <option value="turma-a">Turma A</option>
+                    <option value="turma-b">Turma B</option>
+                    <option value="turma-c">Turma C</option>
+                </select>
+            </div>
+            <div class="flex items-end">
+                <button onclick="applyFilters()" class="btn btn-primary w-full">
+                    <i class="fas fa-filter mr-2"></i>
+                    Aplicar Filtros
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-6" id="summary-cards">
+        <!-- Summary cards will be populated here -->
+    </div>
+
+    <!-- Charts Section -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
+        <!-- Performance Chart -->
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-chart-line text-primary mr-2"></i>
+                Evolução do Desempenho
+            </h3>
+            <div class="h-64 flex items-center justify-center bg-gray-50 rounded">
+                <canvas id="performance-chart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Grade Distribution -->
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-chart-pie text-primary mr-2"></i>
+                Distribuição de Notas
+            </h3>
+            <div class="h-64 flex items-center justify-center bg-gray-50 rounded">
+                <canvas id="grades-chart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Question Analysis -->
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-chart-bar text-primary mr-2"></i>
+                Análise por Questão
+            </h3>
+            <div class="h-64 flex items-center justify-center bg-gray-50 rounded">
+                <canvas id="questions-chart" width="400" height="200"></canvas>
+            </div>
+        </div>
+
+        <!-- Template Usage -->
+        <div class="bg-white rounded-lg shadow-sm border p-6">
+            <h3 class="text-lg font-semibold mb-4">
+                <i class="fas fa-chart-donut text-primary mr-2"></i>
+                Uso de Templates
+            </h3>
+            <div class="h-64 flex items-center justify-center bg-gray-50 rounded">
+                <canvas id="templates-chart" width="400" height="200"></canvas>
+            </div>
+        </div>
+    </div>
+
+    <!-- Detailed Tables -->
+    <div class="space-y-6">
+        <!-- Student Performance Table -->
+        <div class="bg-white rounded-lg shadow-sm border">
+            <div class="p-6 border-b">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">
+                        <i class="fas fa-users text-primary mr-2"></i>
+                        Desempenho por Aluno
+                    </h3>
+                    <div class="flex gap-2">
+                        <button onclick="exportStudentReport()" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-file-excel mr-1"></i>
+                            Excel
+                        </button>
+                        <button onclick="printStudentReport()" class="btn btn-sm btn-outline">
+                            <i class="fas fa-print mr-1"></i>
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aluno</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provas</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Média</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Melhor</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Pior</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tendência</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="students-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Student data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Template Performance Table -->
+        <div class="bg-white rounded-lg shadow-sm border">
+            <div class="p-6 border-b">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">
+                        <i class="fas fa-file-alt text-primary mr-2"></i>
+                        Desempenho por Template
+                    </h3>
+                    <div class="flex gap-2">
+                        <button onclick="exportTemplateReport()" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-file-excel mr-1"></i>
+                            Excel
+                        </button>
+                        <button onclick="printTemplateReport()" class="btn btn-sm btn-outline">
+                            <i class="fas fa-print mr-1"></i>
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Template</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Aplicações</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Média Geral</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Taxa Aprovação</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questão + Difícil</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questão + Fácil</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="templates-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Template data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <!-- Question Analysis Table -->
+        <div class="bg-white rounded-lg shadow-sm border">
+            <div class="p-6 border-b">
+                <div class="flex items-center justify-between">
+                    <h3 class="text-lg font-semibold">
+                        <i class="fas fa-question-circle text-primary mr-2"></i>
+                        Análise Detalhada por Questão
+                    </h3>
+                    <div class="flex gap-2">
+                        <button onclick="exportQuestionReport()" class="btn btn-sm btn-secondary">
+                            <i class="fas fa-file-excel mr-1"></i>
+                            Excel
+                        </button>
+                        <button onclick="printQuestionReport()" class="btn btn-sm btn-outline">
+                            <i class="fas fa-print mr-1"></i>
+                            Imprimir
+                        </button>
+                    </div>
+                </div>
+            </div>
+            <div class="p-6">
+                <div class="overflow-x-auto">
+                    <table class="min-w-full table-auto">
+                        <thead class="bg-gray-50">
+                            <tr>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Questão</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Template</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Tipo</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Acertos</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">% Acerto</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Dificuldade</th>
+                                <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Ações</th>
+                            </tr>
+                        </thead>
+                        <tbody id="questions-table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Question data will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modals -->
+<!-- Student Detail Modal -->
+<div id="student-detail-modal" class="modal" style="display: none;">
+    <div class="modal-content max-w-4xl">
+        <div class="modal-header">
+            <h3 id="student-detail-title">Detalhes do Aluno</h3>
+            <button class="modal-close" onclick="closeStudentDetail()">&times;</button>
+        </div>
+        <div class="modal-body" id="student-detail-content">
+            <!-- Student details will be shown here -->
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeStudentDetail()">Fechar</button>
+            <button class="btn btn-primary" onclick="exportStudentDetail()">Exportar Relatório</button>
+        </div>
+    </div>
+</div>
+
+<!-- Generate Report Modal -->
+<div id="generate-report-modal" class="modal" style="display: none;">
+    <div class="modal-content max-w-md">
+        <div class="modal-header">
+            <h3>Gerar Relatório Personalizado</h3>
+            <button class="modal-close" onclick="closeGenerateReport()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="space-y-4">
+                <div>
+                    <label class="form-label">Tipo de Relatório</label>
+                    <select id="report-type" class="form-select">
+                        <option value="summary">Resumo Executivo</option>
+                        <option value="detailed">Relatório Detalhado</option>
+                        <option value="comparative">Análise Comparativa</option>
+                        <option value="trends">Análise de Tendências</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label class="form-label">Período</label>
+                    <div class="grid grid-cols-2 gap-2">
+                        <input type="date" id="report-start-date" class="form-input">
+                        <input type="date" id="report-end-date" class="form-input">
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="form-label">Incluir</label>
+                    <div class="space-y-2">
+                        <label class="flex items-center">
+                            <input type="checkbox" id="include-charts" class="form-checkbox" checked>
+                            <span class="ml-2">Gráficos e visualizações</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="include-tables" class="form-checkbox" checked>
+                            <span class="ml-2">Tabelas detalhadas</span>
+                        </label>
+                        <label class="flex items-center">
+                            <input type="checkbox" id="include-recommendations" class="form-checkbox">
+                            <span class="ml-2">Recomendações pedagógicas</span>
+                        </label>
+                    </div>
+                </div>
+                
+                <div>
+                    <label class="form-label">Formato de Exportação</label>
+                    <select id="export-format" class="form-select">
+                        <option value="pdf">PDF</option>
+                        <option value="excel">Excel</option>
+                        <option value="word">Word</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeGenerateReport()">Cancelar</button>
+            <button class="btn btn-primary" onclick="confirmGenerateReport()">
+                <i class="fas fa-file-alt mr-2"></i>
+                Gerar Relatório
+            </button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="/static/js/reports.js"></script>
+{% endblock %}

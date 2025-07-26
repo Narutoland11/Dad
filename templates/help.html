@@ -1,0 +1,666 @@
+{% extends "base.html" %}
+
+{% block title %}Ajuda e Documentação - Sistema de Correção{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-primary mb-2">
+                    <i class="fas fa-question-circle" aria-hidden="true"></i>
+                    Ajuda e Documentação
+                </h1>
+                <p class="text-secondary">
+                    Guias, tutoriais e documentação completa do sistema
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-secondary" onclick="printHelp()">
+                    <i class="fas fa-print" aria-hidden="true"></i>
+                    Imprimir
+                </button>
+                <button class="btn btn-primary" onclick="downloadPDF()">
+                    <i class="fas fa-file-pdf" aria-hidden="true"></i>
+                    Baixar PDF
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Search -->
+    <div class="card mb-6">
+        <div class="card-body">
+            <div class="flex items-center gap-4">
+                <div class="flex-1">
+                    <input type="text" id="help-search" class="form-input" 
+                           placeholder="Buscar na documentação..." 
+                           oninput="searchHelp(this.value)">
+                </div>
+                <button class="btn btn-primary" onclick="searchHelp()">
+                    <i class="fas fa-search" aria-hidden="true"></i>
+                    Buscar
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Sidebar Navigation -->
+        <div class="lg:col-span-1">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Navegação</h2>
+                </div>
+                <div class="card-body p-0">
+                    <nav class="help-nav">
+                        <button class="help-nav-item active" onclick="showHelpSection('getting-started')" id="nav-getting-started">
+                            <i class="fas fa-play-circle" aria-hidden="true"></i>
+                            Primeiros Passos
+                        </button>
+                        <button class="help-nav-item" onclick="showHelpSection('templates')" id="nav-templates">
+                            <i class="fas fa-file-alt" aria-hidden="true"></i>
+                            Templates
+                        </button>
+                        <button class="help-nav-item" onclick="showHelpSection('correction')" id="nav-correction">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            Correção de Provas
+                        </button>
+                        <button class="help-nav-item" onclick="showHelpSection('analytics')" id="nav-analytics">
+                            <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                            Relatórios
+                        </button>
+                        <button class="help-nav-item" onclick="showHelpSection('troubleshooting')" id="nav-troubleshooting">
+                            <i class="fas fa-tools" aria-hidden="true"></i>
+                            Solução de Problemas
+                        </button>
+                        <button class="help-nav-item" onclick="showHelpSection('faq')" id="nav-faq">
+                            <i class="fas fa-question" aria-hidden="true"></i>
+                            FAQ
+                        </button>
+                        <button class="help-nav-item" onclick="showHelpSection('api')" id="nav-api">
+                            <i class="fas fa-code" aria-hidden="true"></i>
+                            API
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Quick Links -->
+            <div class="card mt-6">
+                <div class="card-header">
+                    <h3 class="card-title">Links Rápidos</h3>
+                </div>
+                <div class="card-body">
+                    <div class="space-y-2">
+                        <a href="#video-tutorials" class="block text-primary hover:underline">
+                            <i class="fas fa-video" aria-hidden="true"></i>
+                            Vídeo Tutoriais
+                        </a>
+                        <a href="#keyboard-shortcuts" class="block text-primary hover:underline">
+                            <i class="fas fa-keyboard" aria-hidden="true"></i>
+                            Atalhos do Teclado
+                        </a>
+                        <a href="#best-practices" class="block text-primary hover:underline">
+                            <i class="fas fa-star" aria-hidden="true"></i>
+                            Melhores Práticas
+                        </a>
+                        <a href="#contact-support" class="block text-primary hover:underline">
+                            <i class="fas fa-life-ring" aria-hidden="true"></i>
+                            Suporte Técnico
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Main Content -->
+        <div class="lg:col-span-3">
+            <!-- Getting Started -->
+            <div id="help-getting-started" class="help-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-play-circle" aria-hidden="true"></i>
+                            Primeiros Passos
+                        </h2>
+                    </div>
+                    <div class="card-body prose max-w-none">
+                        <h3>Bem-vindo ao Sistema de Correção Automática!</h3>
+                        <p>Este guia irá ajudá-lo a começar a usar o sistema de forma eficiente.</p>
+                        
+                        <h4>1. Configuração Inicial</h4>
+                        <ol>
+                            <li>Acesse as <strong>Configurações</strong> no menu principal</li>
+                            <li>Configure o nome da sua instituição</li>
+                            <li>Defina suas preferências de correção</li>
+                            <li>Ajuste as configurações de OCR conforme necessário</li>
+                        </ol>
+
+                        <h4>2. Criando seu Primeiro Template</h4>
+                        <ol>
+                            <li>Clique em <strong>"Construtor de Templates"</strong></li>
+                            <li>Escolha um nome descritivo para seu template</li>
+                            <li>Adicione questões usando os botões na lateral esquerda</li>
+                            <li>Configure as respostas corretas para cada questão</li>
+                            <li>Salve o template</li>
+                        </ol>
+
+                        <h4>3. Primeira Correção</h4>
+                        <ol>
+                            <li>Na página principal, selecione o template criado</li>
+                            <li>Clique em <strong>"Escolher arquivo"</strong> e selecione uma imagem da prova</li>
+                            <li>Clique em <strong>"Corrigir Prova"</strong></li>
+                            <li>Aguarde o processamento e visualize o resultado</li>
+                        </ol>
+
+                        <div class="bg-info-light p-4 rounded mt-6">
+                            <h4 class="text-info mb-2">
+                                <i class="fas fa-lightbulb" aria-hidden="true"></i>
+                                Dica Importante
+                            </h4>
+                            <p class="mb-0">Para melhores resultados, use imagens com boa qualidade, bem iluminadas e sem sombras. O sistema funciona melhor com imagens escaneadas ou fotografadas de forma perpendicular.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Templates -->
+            <div id="help-templates" class="help-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-file-alt" aria-hidden="true"></i>
+                            Trabalhando com Templates
+                        </h2>
+                    </div>
+                    <div class="card-body prose max-w-none">
+                        <h3>O que são Templates?</h3>
+                        <p>Templates são modelos que definem a estrutura da sua prova, incluindo tipos de questões, respostas corretas, pesos e critérios de correção.</p>
+
+                        <h4>Tipos de Questão Suportados</h4>
+                        <ul>
+                            <li><strong>Múltipla Escolha:</strong> A, B, C, D, E</li>
+                            <li><strong>Verdadeiro/Falso:</strong> V/F ou T/F</li>
+                            <li><strong>Numérica:</strong> Respostas numéricas com margem de erro</li>
+                            <li><strong>Texto Curto:</strong> Respostas em texto</li>
+                            <li><strong>Símbolos Customizados:</strong> Símbolos personalizados</li>
+                        </ul>
+
+                        <h4>Configurações Avançadas</h4>
+                        <h5>Pesos das Questões</h5>
+                        <p>Você pode atribuir pesos diferentes para cada questão. Por exemplo:</p>
+                        <ul>
+                            <li>Questões básicas: peso 1.0</li>
+                            <li>Questões intermediárias: peso 1.5</li>
+                            <li>Questões avançadas: peso 2.0</li>
+                        </ul>
+
+                        <h5>Múltiplas Respostas Corretas</h5>
+                        <p>Para questões que aceitam mais de uma resposta correta, marque todas as alternativas válidas no editor.</p>
+
+                        <h5>Margem de Erro (Questões Numéricas)</h5>
+                        <p>Para questões numéricas, defina uma margem de erro aceitável. Por exemplo, se a resposta correta é 10 e a margem é 0.5, respostas entre 9.5 e 10.5 serão aceitas.</p>
+
+                        <div class="bg-warning-light p-4 rounded mt-6">
+                            <h4 class="text-warning mb-2">
+                                <i class="fas fa-exclamation-triangle" aria-hidden="true"></i>
+                                Atenção
+                            </h4>
+                            <p class="mb-0">Sempre teste seus templates com algumas provas antes de usar em larga escala. Isso ajuda a identificar possíveis problemas de configuração.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Correction -->
+            <div id="help-correction" class="help-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-check-circle" aria-hidden="true"></i>
+                            Correção de Provas
+                        </h2>
+                    </div>
+                    <div class="card-body prose max-w-none">
+                        <h3>Correção Individual</h3>
+                        <p>Para corrigir uma prova individual:</p>
+                        <ol>
+                            <li>Selecione o template apropriado</li>
+                            <li>Faça upload da imagem da prova</li>
+                            <li>Clique em "Corrigir Prova"</li>
+                            <li>Aguarde o processamento</li>
+                            <li>Revise o resultado e baixe o relatório se necessário</li>
+                        </ol>
+
+                        <h3>Correção em Lote</h3>
+                        <p>Para corrigir múltiplas provas simultaneamente:</p>
+                        <ol>
+                            <li>Selecione o template</li>
+                            <li>Faça upload de múltiplas imagens</li>
+                            <li>Clique em "Processar Lote"</li>
+                            <li>Acompanhe o progresso na barra</li>
+                            <li>Revise os resultados individuais</li>
+                        </ol>
+
+                        <h4>Formatos de Arquivo Suportados</h4>
+                        <ul>
+                            <li>JPEG (.jpg, .jpeg)</li>
+                            <li>PNG (.png)</li>
+                            <li>PDF (primeira página)</li>
+                            <li>TIFF (.tiff, .tif)</li>
+                        </ul>
+
+                        <h4>Requisitos de Qualidade</h4>
+                        <ul>
+                            <li><strong>Resolução:</strong> Mínimo 300 DPI</li>
+                            <li><strong>Iluminação:</strong> Uniforme, sem sombras</li>
+                            <li><strong>Orientação:</strong> Perpendicular à câmera</li>
+                            <li><strong>Foco:</strong> Nítido, sem desfoque</li>
+                        </ul>
+
+                        <h4>Interpretando Resultados</h4>
+                        <p>Cada resultado inclui:</p>
+                        <ul>
+                            <li><strong>Nota final:</strong> Calculada com base nos pesos</li>
+                            <li><strong>Percentual de acerto:</strong> Porcentagem de questões corretas</li>
+                            <li><strong>Detalhes por questão:</strong> Resposta detectada vs. resposta correta</li>
+                            <li><strong>Confiança:</strong> Nível de certeza do OCR para cada resposta</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Analytics -->
+            <div id="help-analytics" class="help-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-chart-bar" aria-hidden="true"></i>
+                            Relatórios e Analytics
+                        </h2>
+                    </div>
+                    <div class="card-body prose max-w-none">
+                        <h3>Dashboard de Analytics</h3>
+                        <p>O dashboard fornece uma visão geral do desempenho do sistema e dos alunos.</p>
+
+                        <h4>Métricas Principais</h4>
+                        <ul>
+                            <li><strong>Total de Correções:</strong> Número total de provas corrigidas</li>
+                            <li><strong>Nota Média:</strong> Média geral de todas as correções</li>
+                            <li><strong>Taxa de Aprovação:</strong> Percentual de alunos aprovados</li>
+                            <li><strong>Tempo Médio:</strong> Tempo médio de processamento</li>
+                        </ul>
+
+                        <h4>Gráficos Disponíveis</h4>
+                        <ul>
+                            <li><strong>Correções ao Longo do Tempo:</strong> Mostra a evolução das correções</li>
+                            <li><strong>Distribuição de Notas:</strong> Histograma das notas obtidas</li>
+                            <li><strong>Performance por Template:</strong> Comparação entre diferentes templates</li>
+                        </ul>
+
+                        <h4>Relatórios de Exportação</h4>
+                        <p>Você pode exportar dados em diferentes formatos:</p>
+                        <ul>
+                            <li><strong>PDF:</strong> Relatório completo formatado</li>
+                            <li><strong>Excel:</strong> Dados estruturados para análise</li>
+                            <li><strong>CSV:</strong> Dados brutos para processamento</li>
+                        </ul>
+
+                        <h4>Análise de Questões Difíceis</h4>
+                        <p>O sistema identifica automaticamente:</p>
+                        <ul>
+                            <li>Questões com maior taxa de erro</li>
+                            <li>Padrões de erro comuns</li>
+                            <li>Recomendações para melhoria</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Troubleshooting -->
+            <div id="help-troubleshooting" class="help-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-tools" aria-hidden="true"></i>
+                            Solução de Problemas
+                        </h2>
+                    </div>
+                    <div class="card-body prose max-w-none">
+                        <h3>Problemas Comuns e Soluções</h3>
+
+                        <h4>OCR não reconhece as marcações</h4>
+                        <p><strong>Possíveis causas:</strong></p>
+                        <ul>
+                            <li>Imagem com baixa qualidade</li>
+                            <li>Marcações muito fracas ou borradas</li>
+                            <li>Sombras na imagem</li>
+                        </ul>
+                        <p><strong>Soluções:</strong></p>
+                        <ul>
+                            <li>Use imagens com resolução mínima de 300 DPI</li>
+                            <li>Certifique-se de que as marcações estão bem visíveis</li>
+                            <li>Evite sombras e reflexos</li>
+                            <li>Ajuste as configurações de pré-processamento</li>
+                        </ul>
+
+                        <h4>Resultados inconsistentes</h4>
+                        <p><strong>Possíveis causas:</strong></p>
+                        <ul>
+                            <li>Template mal configurado</li>
+                            <li>Múltiplas marcações na mesma questão</li>
+                            <li>Marcações fora da área designada</li>
+                        </ul>
+                        <p><strong>Soluções:</strong></p>
+                        <ul>
+                            <li>Revise a configuração do template</li>
+                            <li>Oriente os alunos sobre a marcação correta</li>
+                            <li>Use o modo de revisão manual para casos duvidosos</li>
+                        </ul>
+
+                        <h4>Processamento muito lento</h4>
+                        <p><strong>Possíveis causas:</strong></p>
+                        <ul>
+                            <li>Imagens muito grandes</li>
+                            <li>Configuração de qualidade muito alta</li>
+                            <li>Muitos arquivos processados simultaneamente</li>
+                        </ul>
+                        <p><strong>Soluções:</strong></p>
+                        <ul>
+                            <li>Redimensione as imagens para tamanho adequado</li>
+                            <li>Ajuste a configuração de qualidade</li>
+                            <li>Processe em lotes menores</li>
+                        </ul>
+
+                        <h4>Erro de upload de arquivo</h4>
+                        <p><strong>Possíveis causas:</strong></p>
+                        <ul>
+                            <li>Arquivo muito grande</li>
+                            <li>Formato não suportado</li>
+                            <li>Conexão instável</li>
+                        </ul>
+                        <p><strong>Soluções:</strong></p>
+                        <ul>
+                            <li>Verifique o tamanho máximo permitido</li>
+                            <li>Use formatos suportados (JPEG, PNG, PDF)</li>
+                            <li>Tente novamente com conexão estável</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- FAQ -->
+            <div id="help-faq" class="help-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-question" aria-hidden="true"></i>
+                            Perguntas Frequentes (FAQ)
+                        </h2>
+                    </div>
+                    <div class="card-body">
+                        <div class="space-y-4">
+                            <div class="faq-item">
+                                <button class="faq-question" onclick="toggleFAQ(this)">
+                                    <span>Quantas provas posso corrigir simultaneamente?</span>
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </button>
+                                <div class="faq-answer" style="display: none;">
+                                    <p>O sistema suporta correção em lote de até 100 provas simultaneamente. Para melhor performance, recomendamos lotes de 25-50 provas.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question" onclick="toggleFAQ(this)">
+                                    <span>Posso usar o sistema offline?</span>
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </button>
+                                <div class="faq-answer" style="display: none;">
+                                    <p>Atualmente o sistema requer conexão com internet para funcionar. Estamos desenvolvendo uma versão offline para uso futuro.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question" onclick="toggleFAQ(this)">
+                                    <span>Como backup meus dados?</span>
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </button>
+                                <div class="faq-answer" style="display: none;">
+                                    <p>Acesse Configurações > Backup e Dados. Você pode configurar backup automático ou criar backups manuais a qualquer momento.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question" onclick="toggleFAQ(this)">
+                                    <span>O sistema funciona com provas manuscritas?</span>
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </button>
+                                <div class="faq-answer" style="display: none;">
+                                    <p>O sistema é otimizado para marcações em campos específicos (múltipla escolha, V/F). Para texto manuscrito, a precisão pode variar dependendo da caligrafia.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question" onclick="toggleFAQ(this)">
+                                    <span>Posso personalizar as escalas de nota?</span>
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </button>
+                                <div class="faq-answer" style="display: none;">
+                                    <p>Sim! O sistema suporta diferentes escalas: 0-10, 0-100, letras (A-F) e escalas personalizadas. Configure em Configurações > Correção e Notas.</p>
+                                </div>
+                            </div>
+
+                            <div class="faq-item">
+                                <button class="faq-question" onclick="toggleFAQ(this)">
+                                    <span>Como melhorar a precisão do OCR?</span>
+                                    <i class="fas fa-chevron-down" aria-hidden="true"></i>
+                                </button>
+                                <div class="faq-answer" style="display: none;">
+                                    <p>Use imagens de alta qualidade (300+ DPI), com boa iluminação, sem sombras. Ative o pré-processamento automático e ajuste o limite de confiança conforme necessário.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- API -->
+            <div id="help-api" class="help-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-code" aria-hidden="true"></i>
+                            Documentação da API
+                        </h2>
+                    </div>
+                    <div class="card-body prose max-w-none">
+                        <h3>Endpoints Disponíveis</h3>
+
+                        <h4>Templates</h4>
+                        <div class="bg-gray-100 p-4 rounded mb-4">
+                            <code>GET /api/templates</code> - Lista todos os templates<br>
+                            <code>POST /api/templates</code> - Cria novo template<br>
+                            <code>GET /api/templates/{id}</code> - Obtém template específico<br>
+                            <code>PUT /api/templates/{id}</code> - Atualiza template<br>
+                            <code>DELETE /api/templates/{id}</code> - Remove template
+                        </div>
+
+                        <h4>Correção</h4>
+                        <div class="bg-gray-100 p-4 rounded mb-4">
+                            <code>POST /api/correct</code> - Corrige prova individual<br>
+                            <code>POST /api/correct/batch</code> - Correção em lote<br>
+                            <code>GET /api/results/{id}</code> - Obtém resultado específico
+                        </div>
+
+                        <h4>Analytics</h4>
+                        <div class="bg-gray-100 p-4 rounded mb-4">
+                            <code>GET /api/stats</code> - Estatísticas gerais<br>
+                            <code>GET /api/analytics/performance</code> - Performance por template<br>
+                            <code>GET /api/analytics/export</code> - Exportar dados
+                        </div>
+
+                        <h4>Exemplo de Uso</h4>
+                        <pre class="bg-gray-100 p-4 rounded"><code>// Criar novo template
+fetch('/api/templates', {
+  method: 'POST',
+  headers: {
+    'Content-Type': 'application/json'
+  },
+  body: JSON.stringify({
+    name: 'Minha Prova',
+    questions: [
+      {
+        type: 'multiple_choice',
+        correct_answers: ['A'],
+        weight: 1.0
+      }
+    ]
+  })
+})
+.then(response => response.json())
+.then(data => console.log(data));</code></pre>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.help-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.help-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-align: left;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--border);
+}
+
+.help-nav-item:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.help-nav-item.active {
+    background-color: var(--primary-light);
+    color: var(--primary);
+    border-right: 3px solid var(--primary);
+}
+
+.help-nav-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.help-section {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.prose {
+    line-height: 1.6;
+}
+
+.prose h3 {
+    color: var(--primary);
+    margin-top: 2rem;
+    margin-bottom: 1rem;
+}
+
+.prose h4 {
+    color: var(--text-primary);
+    margin-top: 1.5rem;
+    margin-bottom: 0.5rem;
+}
+
+.prose h5 {
+    color: var(--text-primary);
+    margin-top: 1rem;
+    margin-bottom: 0.5rem;
+}
+
+.prose ul, .prose ol {
+    margin: 1rem 0;
+    padding-left: 2rem;
+}
+
+.prose li {
+    margin: 0.5rem 0;
+}
+
+.faq-item {
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.faq-question {
+    width: 100%;
+    padding: 16px;
+    background: none;
+    border: none;
+    text-align: left;
+    display: flex;
+    justify-content: between;
+    align-items: center;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.faq-question:hover {
+    background-color: var(--bg-secondary);
+}
+
+.faq-question span {
+    flex: 1;
+    font-weight: 500;
+}
+
+.faq-question i {
+    transition: transform 0.2s ease;
+}
+
+.faq-question.active i {
+    transform: rotate(180deg);
+}
+
+.faq-answer {
+    padding: 0 16px 16px;
+    color: var(--text-secondary);
+}
+
+.faq-answer p {
+    margin: 0;
+}
+
+pre {
+    overflow-x: auto;
+}
+
+code {
+    font-family: 'Courier New', monospace;
+    font-size: 0.9em;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/help.js') }}"></script>
+{% endblock %}

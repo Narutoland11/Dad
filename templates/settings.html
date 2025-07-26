@@ -1,0 +1,662 @@
+{% extends "base.html" %}
+
+{% block title %}Configurações - Sistema de Correção{% endblock %}
+
+{% block content %}
+<div class="container mx-auto px-4 py-6">
+    <!-- Header -->
+    <div class="mb-8">
+        <div class="flex items-center justify-between">
+            <div>
+                <h1 class="text-3xl font-bold text-primary mb-2">
+                    <i class="fas fa-cog" aria-hidden="true"></i>
+                    Configurações do Sistema
+                </h1>
+                <p class="text-secondary">
+                    Personalize o comportamento e aparência do sistema de correção
+                </p>
+            </div>
+            <div class="flex gap-2">
+                <button class="btn btn-secondary" onclick="resetToDefaults()">
+                    <i class="fas fa-undo" aria-hidden="true"></i>
+                    Restaurar Padrões
+                </button>
+                <button class="btn btn-success" onclick="saveAllSettings()">
+                    <i class="fas fa-save" aria-hidden="true"></i>
+                    Salvar Configurações
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Settings Navigation -->
+    <div class="grid grid-cols-1 lg:grid-cols-4 gap-6">
+        <!-- Left Sidebar - Categories -->
+        <div class="lg:col-span-1">
+            <div class="card">
+                <div class="card-header">
+                    <h2 class="card-title">Categorias</h2>
+                </div>
+                <div class="card-body p-0">
+                    <nav class="settings-nav">
+                        <button class="settings-nav-item active" onclick="showSettingsSection('general')" id="nav-general">
+                            <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                            Geral
+                        </button>
+                        <button class="settings-nav-item" onclick="showSettingsSection('ocr')" id="nav-ocr">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                            OCR e Processamento
+                        </button>
+                        <button class="settings-nav-item" onclick="showSettingsSection('grading')" id="nav-grading">
+                            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                            Correção e Notas
+                        </button>
+                        <button class="settings-nav-item" onclick="showSettingsSection('interface')" id="nav-interface">
+                            <i class="fas fa-palette" aria-hidden="true"></i>
+                            Interface
+                        </button>
+                        <button class="settings-nav-item" onclick="showSettingsSection('notifications')" id="nav-notifications">
+                            <i class="fas fa-bell" aria-hidden="true"></i>
+                            Notificações
+                        </button>
+                        <button class="settings-nav-item" onclick="showSettingsSection('security')" id="nav-security">
+                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                            Segurança
+                        </button>
+                        <button class="settings-nav-item" onclick="showSettingsSection('backup')" id="nav-backup">
+                            <i class="fas fa-database" aria-hidden="true"></i>
+                            Backup e Dados
+                        </button>
+                    </nav>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right Content - Settings Panels -->
+        <div class="lg:col-span-3">
+            <!-- General Settings -->
+            <div id="settings-general" class="settings-section">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-sliders-h" aria-hidden="true"></i>
+                            Configurações Gerais
+                        </h2>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <div class="form-group">
+                            <label for="system-name" class="form-label">Nome do Sistema</label>
+                            <input type="text" id="system-name" class="form-input" 
+                                   value="Sistema de Correção Automática"
+                                   aria-describedby="system-name-help">
+                            <div id="system-name-help" class="form-help">
+                                Nome exibido no cabeçalho e relatórios
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="institution-name" class="form-label">Nome da Instituição</label>
+                            <input type="text" id="institution-name" class="form-input" 
+                                   placeholder="Ex: Escola Municipal João Silva">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="default-language" class="form-label">Idioma Padrão</label>
+                            <select id="default-language" class="form-input">
+                                <option value="pt-BR" selected>Português (Brasil)</option>
+                                <option value="en-US">English (US)</option>
+                                <option value="es-ES">Español</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="timezone" class="form-label">Fuso Horário</label>
+                            <select id="timezone" class="form-input">
+                                <option value="America/Sao_Paulo" selected>São Paulo (UTC-3)</option>
+                                <option value="America/New_York">New York (UTC-5)</option>
+                                <option value="Europe/London">London (UTC+0)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Opções Gerais</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="auto-save" checked>
+                                    <span>Salvamento automático de templates</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="show-tips" checked>
+                                    <span>Mostrar dicas de uso</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="confirm-actions">
+                                    <span>Confirmar ações destrutivas</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- OCR Settings -->
+            <div id="settings-ocr" class="settings-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-eye" aria-hidden="true"></i>
+                            OCR e Processamento de Imagem
+                        </h2>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <div class="form-group">
+                            <label for="ocr-engine" class="form-label">Engine de OCR</label>
+                            <select id="ocr-engine" class="form-input">
+                                <option value="tesseract" selected>Tesseract</option>
+                                <option value="google-vision">Google Vision API</option>
+                                <option value="azure-ocr">Azure OCR</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="image-quality" class="form-label">Qualidade de Processamento</label>
+                            <select id="image-quality" class="form-input">
+                                <option value="fast">Rápida (menor precisão)</option>
+                                <option value="balanced" selected>Balanceada</option>
+                                <option value="high">Alta (mais lenta)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="confidence-threshold" class="form-label">
+                                Limite de Confiança (%): <span id="confidence-value">85</span>
+                            </label>
+                            <input type="range" id="confidence-threshold" class="form-range" 
+                                   min="50" max="100" value="85" 
+                                   oninput="document.getElementById('confidence-value').textContent = this.value">
+                            <div class="form-help">
+                                Respostas com confiança abaixo deste valor serão marcadas para revisão
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Pré-processamento de Imagem</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="auto-rotate" checked>
+                                    <span>Rotação automática</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="shadow-removal" checked>
+                                    <span>Remoção de sombras</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="noise-reduction">
+                                    <span>Redução de ruído</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="contrast-enhancement" checked>
+                                    <span>Melhoria de contraste</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="max-file-size" class="form-label">Tamanho Máximo de Arquivo (MB)</label>
+                            <input type="number" id="max-file-size" class="form-input" 
+                                   value="10" min="1" max="50">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Grading Settings -->
+            <div id="settings-grading" class="settings-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-graduation-cap" aria-hidden="true"></i>
+                            Correção e Sistema de Notas
+                        </h2>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <div class="form-group">
+                            <label for="default-grading-scale" class="form-label">Escala de Notas Padrão</label>
+                            <select id="default-grading-scale" class="form-input">
+                                <option value="0-10" selected>0 a 10</option>
+                                <option value="0-100">0 a 100</option>
+                                <option value="letter">A, B, C, D, F</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="passing-grade-default" class="form-label">Nota Mínima Padrão (%)</label>
+                            <input type="number" id="passing-grade-default" class="form-input" 
+                                   value="60" min="0" max="100">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="rounding-method" class="form-label">Método de Arredondamento</label>
+                            <select id="rounding-method" class="form-input">
+                                <option value="round" selected>Arredondamento padrão</option>
+                                <option value="ceil">Sempre para cima</option>
+                                <option value="floor">Sempre para baixo</option>
+                                <option value="none">Sem arredondamento</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="decimal-places" class="form-label">Casas Decimais</label>
+                            <select id="decimal-places" class="form-input">
+                                <option value="0">0 (números inteiros)</option>
+                                <option value="1" selected>1 casa decimal</option>
+                                <option value="2">2 casas decimais</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Opções de Correção</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="partial-credit-default" checked>
+                                    <span>Permitir crédito parcial por padrão</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="penalty-wrong-answers">
+                                    <span>Penalizar respostas incorretas</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="bonus-points">
+                                    <span>Permitir pontos extras</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Interface Settings -->
+            <div id="settings-interface" class="settings-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-palette" aria-hidden="true"></i>
+                            Configurações de Interface
+                        </h2>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <div class="form-group">
+                            <label for="theme" class="form-label">Tema</label>
+                            <select id="theme" class="form-input" onchange="changeTheme()">
+                                <option value="light" selected>Claro</option>
+                                <option value="dark">Escuro</option>
+                                <option value="auto">Automático (sistema)</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="font-size" class="form-label">Tamanho da Fonte</label>
+                            <select id="font-size" class="form-input">
+                                <option value="small">Pequena</option>
+                                <option value="medium" selected>Média</option>
+                                <option value="large">Grande</option>
+                                <option value="extra-large">Extra Grande</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="items-per-page" class="form-label">Itens por Página</label>
+                            <select id="items-per-page" class="form-input">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Acessibilidade</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="high-contrast">
+                                    <span>Alto contraste</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="reduce-animations">
+                                    <span>Reduzir animações</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="screen-reader-optimized" checked>
+                                    <span>Otimizado para leitores de tela</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Exibição</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="show-tooltips" checked>
+                                    <span>Mostrar dicas de ferramentas</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="compact-mode">
+                                    <span>Modo compacto</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="show-progress-bars" checked>
+                                    <span>Mostrar barras de progresso</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Notifications Settings -->
+            <div id="settings-notifications" class="settings-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-bell" aria-hidden="true"></i>
+                            Configurações de Notificações
+                        </h2>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <div class="form-group">
+                            <label class="form-label">Notificações do Sistema</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="notify-completion" checked>
+                                    <span>Correção concluída</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="notify-errors" checked>
+                                    <span>Erros de processamento</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="notify-low-confidence">
+                                    <span>Baixa confiança em respostas</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="notify-batch-complete" checked>
+                                    <span>Processamento em lote concluído</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notification-method" class="form-label">Método de Notificação</label>
+                            <select id="notification-method" class="form-input">
+                                <option value="browser" selected>Navegador</option>
+                                <option value="email">Email</option>
+                                <option value="both">Ambos</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notification-email" class="form-label">Email para Notificações</label>
+                            <input type="email" id="notification-email" class="form-input" 
+                                   placeholder="seu@email.com">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notification-sound" class="form-label">Som de Notificação</label>
+                            <select id="notification-sound" class="form-input">
+                                <option value="none">Nenhum</option>
+                                <option value="default" selected>Padrão</option>
+                                <option value="chime">Sino</option>
+                                <option value="beep">Bip</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Security Settings -->
+            <div id="settings-security" class="settings-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-shield-alt" aria-hidden="true"></i>
+                            Configurações de Segurança
+                        </h2>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <div class="form-group">
+                            <label for="session-timeout" class="form-label">Timeout de Sessão (minutos)</label>
+                            <input type="number" id="session-timeout" class="form-input" 
+                                   value="60" min="5" max="480">
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Opções de Segurança</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="require-confirmation" checked>
+                                    <span>Confirmar exclusões</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="log-activities" checked>
+                                    <span>Registrar atividades</span>
+                                </label>
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="encrypt-data">
+                                    <span>Criptografar dados sensíveis</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="max-login-attempts" class="form-label">Tentativas Máximas de Login</label>
+                            <input type="number" id="max-login-attempts" class="form-input" 
+                                   value="5" min="3" max="10">
+                        </div>
+
+                        <div class="form-group">
+                            <button class="btn btn-warning" onclick="clearAllData()">
+                                <i class="fas fa-trash-alt" aria-hidden="true"></i>
+                                Limpar Todos os Dados
+                            </button>
+                            <div class="form-help text-warning">
+                                ⚠️ Esta ação não pode ser desfeita
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Backup Settings -->
+            <div id="settings-backup" class="settings-section" style="display: none;">
+                <div class="card">
+                    <div class="card-header">
+                        <h2 class="card-title">
+                            <i class="fas fa-database" aria-hidden="true"></i>
+                            Backup e Gerenciamento de Dados
+                        </h2>
+                    </div>
+                    <div class="card-body space-y-6">
+                        <div class="form-group">
+                            <label class="form-label">Backup Automático</label>
+                            <div class="space-y-2">
+                                <label class="flex items-center gap-2">
+                                    <input type="checkbox" id="auto-backup" checked>
+                                    <span>Ativar backup automático</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="backup-frequency" class="form-label">Frequência de Backup</label>
+                            <select id="backup-frequency" class="form-input">
+                                <option value="daily" selected>Diário</option>
+                                <option value="weekly">Semanal</option>
+                                <option value="monthly">Mensal</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="backup-retention" class="form-label">Manter Backups por (dias)</label>
+                            <input type="number" id="backup-retention" class="form-input" 
+                                   value="30" min="7" max="365">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="flex gap-2">
+                                <button class="btn btn-primary" onclick="createBackup()">
+                                    <i class="fas fa-download" aria-hidden="true"></i>
+                                    Criar Backup Agora
+                                </button>
+                                <button class="btn btn-secondary" onclick="restoreBackup()">
+                                    <i class="fas fa-upload" aria-hidden="true"></i>
+                                    Restaurar Backup
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Limpeza de Dados</label>
+                            <div class="space-y-2">
+                                <button class="btn btn-warning btn-sm" onclick="cleanOldResults()">
+                                    <i class="fas fa-broom" aria-hidden="true"></i>
+                                    Limpar Resultados Antigos (>90 dias)
+                                </button>
+                                <button class="btn btn-warning btn-sm" onclick="cleanTempFiles()">
+                                    <i class="fas fa-trash" aria-hidden="true"></i>
+                                    Limpar Arquivos Temporários
+                                </button>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="form-label">Estatísticas de Armazenamento</label>
+                            <div class="space-y-2 text-sm">
+                                <div class="flex justify-between">
+                                    <span>Templates:</span>
+                                    <span>2.3 MB</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Resultados:</span>
+                                    <span>15.7 MB</span>
+                                </div>
+                                <div class="flex justify-between">
+                                    <span>Imagens processadas:</span>
+                                    <span>124.5 MB</span>
+                                </div>
+                                <div class="flex justify-between font-semibold">
+                                    <span>Total:</span>
+                                    <span>142.5 MB</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirmation Modal -->
+<div id="confirmation-modal" class="modal-overlay" style="display: none;" 
+     role="dialog" aria-labelledby="confirmation-title" aria-hidden="true">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="confirmation-title" class="modal-title">Confirmar Ação</h3>
+            <button class="modal-close" onclick="closeConfirmationModal()" 
+                    aria-label="Fechar confirmação">
+                <i class="fas fa-times" aria-hidden="true"></i>
+            </button>
+        </div>
+        <div class="modal-body">
+            <p id="confirmation-message">Tem certeza que deseja realizar esta ação?</p>
+        </div>
+        <div class="modal-footer">
+            <button class="btn btn-secondary" onclick="closeConfirmationModal()">
+                Cancelar
+            </button>
+            <button class="btn btn-primary" id="confirmation-confirm" onclick="confirmAction()">
+                Confirmar
+            </button>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block styles %}
+<style>
+.settings-nav {
+    display: flex;
+    flex-direction: column;
+}
+
+.settings-nav-item {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 16px;
+    text-align: left;
+    border: none;
+    background: none;
+    color: var(--text-secondary);
+    transition: all 0.2s ease;
+    border-bottom: 1px solid var(--border);
+}
+
+.settings-nav-item:hover {
+    background-color: var(--bg-secondary);
+    color: var(--text-primary);
+}
+
+.settings-nav-item.active {
+    background-color: var(--primary-light);
+    color: var(--primary);
+    border-right: 3px solid var(--primary);
+}
+
+.settings-nav-item i {
+    width: 16px;
+    text-align: center;
+}
+
+.settings-section {
+    animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+.form-range {
+    width: 100%;
+    height: 6px;
+    border-radius: 3px;
+    background: var(--bg-secondary);
+    outline: none;
+    -webkit-appearance: none;
+}
+
+.form-range::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    appearance: none;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+}
+
+.form-range::-moz-range-thumb {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background: var(--primary);
+    cursor: pointer;
+    border: none;
+}
+</style>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/settings.js') }}"></script>
+{% endblock %}
