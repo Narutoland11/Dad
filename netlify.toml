@@ -2,23 +2,45 @@
   publish = "."
   command = "echo 'Static site ready for deployment'"
 
-[build.environment]
-  NODE_VERSION = "18"
+[[redirects]]
+  from = "/templates/builder"
+  to = "/templates/template_builder.html"
+  status = 200
 
 [[redirects]]
-  from = "/api/*"
-  to = "/.netlify/functions/:splat"
+  from = "/templates"
+  to = "/templates/templates_list.html"
+  status = 200
+
+[[redirects]]
+  from = "/correction"
+  to = "/templates/correction.html"
+  status = 200
+
+[[redirects]]
+  from = "/reports"
+  to = "/templates/reports.html"
+  status = 200
+
+[[redirects]]
+  from = "/analytics"
+  to = "/templates/analytics.html"
+  status = 200
+
+[[redirects]]
+  from = "/settings"
+  to = "/templates/settings.html"
+  status = 200
+
+[[redirects]]
+  from = "/help"
+  to = "/templates/help.html"
   status = 200
 
 [[redirects]]
   from = "/*"
-  to = "/index.html"
+  to = "/templates/index.html"
   status = 200
-
-[dev]
-  command = "python simple_web_app.py"
-  port = 5000
-  publish = "."
 
 [[headers]]
   for = "/*"
